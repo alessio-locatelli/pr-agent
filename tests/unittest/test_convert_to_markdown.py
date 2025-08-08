@@ -52,10 +52,8 @@ class TestConvertToMarkdown:
             'estimated_effort_to_review_[1-5]': '1, because the changes are minimal and straightforward, focusing on a single functionality addition.\n',
             'relevant_tests': 'No\n', 'possible_issues': 'No\n', 'security_concerns': 'No\n'}}
 
-        expected_output = textwrap.dedent(f"""\
+        expected_output = textwrap.dedent(f"""
             {PRReviewHeader.REGULAR.value} 🔍
-
-            Here are some key observations to aid the review process:
 
             <table>
             <tr><td>⏱️&nbsp;<strong>Estimated effort to review</strong>: 1 🔵⚪⚪⚪⚪</td></tr>
@@ -73,10 +71,8 @@ class TestConvertToMarkdown:
             'estimated_effort_to_review_[1-5]': '1, because the changes are minimal and straightforward, focusing on a single functionality addition.\n',
             'relevant_tests': 'No\n', 'possible_issues': 'No\n', 'security_concerns': 'No\n'}}
 
-        expected_output = textwrap.dedent("""\
+        expected_output = textwrap.dedent("""
             ## PR Reviewer Guide 🔍
-
-            Here are some key observations to aid the review process:
 
             ### ⏱️ Estimated effort to review: 1 🔵⚪⚪⚪⚪
 
@@ -106,10 +102,8 @@ class TestConvertToMarkdown:
         reference_link = 'https://github.com/qodo/pr-agent/pull/1/files#diff-hashvalue-R174'
         mock_git_provider.get_line_link.return_value = reference_link
 
-        expected_output = textwrap.dedent(f"""\
-            ## PR Reviewer Guide 🔍
-
-            Here are some key observations to aid the review process:
+        expected_output = textwrap.dedent(f"""
+            {PRReviewHeader.REGULAR.value} 🔍
 
             <table>
             <tr><td>⚡&nbsp;<strong>Recommended focus areas for review</strong><br><br>
@@ -136,10 +130,8 @@ class TestConvertToMarkdown:
             ]
         }}
 
-        expected_output = textwrap.dedent("""\
-            ## PR Reviewer Guide 🔍
-
-            Here are some key observations to aid the review process:
+        expected_output = textwrap.dedent(f"""
+            {PRReviewHeader.REGULAR.value} 🔍
 
             <table>
             <tr><td>
@@ -183,10 +175,8 @@ class TestConvertToMarkdown:
         }
         }
 
-        expected_output = textwrap.dedent("""\
-            ## PR Reviewer Guide 🔍
-
-            Here are some key observations to aid the review process:
+        expected_output = textwrap.dedent(f"""
+            {PRReviewHeader.REGULAR.value} 🔍
 
             <table>
             <tr><td>🔀 <strong>Multiple PR themes</strong><br><br>
@@ -222,6 +212,27 @@ class TestConvertToMarkdown:
 
         assert convert_to_markdown_v2(input_data).strip() == expected_output.strip()
 
+    def test_contribution_time_cost_estimate(self):
+        input_data = {
+            'review': {
+                'contribution_time_cost_estimate': {
+                    'best_case': '1h',
+                    'average_case': '2h',
+                    'worst_case': '30m',
+                }
+            }
+        }
+
+        expected_output = textwrap.dedent(f"""
+            {PRReviewHeader.REGULAR.value} 🔍
+
+            <table>
+            <tr><td>⏳&nbsp;<strong>Contribution time estimate</strong> (best, average, worst case): 1h | 2h | 30 minutes</td></tr>
+            </table>
+        """)
+
+        assert convert_to_markdown_v2(input_data).strip() == expected_output.strip()
+
     # Tests that the function works correctly with an empty dictionary input
     def test_empty_dictionary_input(self):
         input_data = {}
@@ -242,8 +253,8 @@ class TestBR:
     def test_br1(self):
         file_change_description = '- Imported `FilePatchInfo` and `EDIT_TYPE` from `pr_agent.algo.types` instead of `pr_agent.git_providers.git_provider`.'
         file_change_description_br = insert_br_after_x_chars(file_change_description)
-        expected_output = ('<ul><li>Imported <code>FilePatchInfo</code> and <code>EDIT_TYPE</code> from '
-                           '<code>pr_agent.algo.types</code> instead <br>of '
+        expected_output = ('<ul><li>Imported <code>FilePatchInfo</code> and <code>EDIT_TYPE</code> from ' 
+                           '<code>pr_agent.algo.types</code> instead <br>of ' 
                            '<code>pr_agent.git_providers.git_provider</code>.</ul>')
         assert file_change_description_br == expected_output
         # print("-----")
@@ -251,11 +262,11 @@ class TestBR:
 
     def test_br2(self):
         file_change_description = (
-            '- Created a - new -class `ColorPaletteResourcesCollection ColorPaletteResourcesCollection '
+            '- Created a - new -class `ColorPaletteResourcesCollection ColorPaletteResourcesCollection ' 
             'ColorPaletteResourcesCollection ColorPaletteResourcesCollection`')
         file_change_description_br = insert_br_after_x_chars(file_change_description)
-        expected_output = ('<ul><li>Created a - new -class <code>ColorPaletteResourcesCollection </code><br><code>'
-                           'ColorPaletteResourcesCollection ColorPaletteResourcesCollection '
+        expected_output = ('<ul><li>Created a - new -class <code>ColorPaletteResourcesCollection </code><br><code>' 
+                           'ColorPaletteResourcesCollection ColorPaletteResourcesCollection ' 
                            '</code><br><code>ColorPaletteResourcesCollection</code></ul>')
         assert file_change_description_br == expected_output
         # print("-----")
@@ -264,8 +275,8 @@ class TestBR:
     def test_br3(self):
         file_change_description = 'Created a new class `ColorPaletteResourcesCollection` which extends `AvaloniaDictionary<ThemeVariant, ColorPaletteResources>` and implements aaa'
         file_change_description_br = insert_br_after_x_chars(file_change_description)
-        assert file_change_description_br == ('Created a new class <code>ColorPaletteResourcesCollection</code> which '
-                                              'extends <br><code>AvaloniaDictionary<ThemeVariant, ColorPaletteResources>'
+        assert file_change_description_br == ('Created a new class <code>ColorPaletteResourcesCollection</code> which ' 
+                                              'extends <br><code>AvaloniaDictionary<ThemeVariant, ColorPaletteResources>' 
                                               '</code> and implements <br>aaa')
         # print("-----")
         # print(file_change_description_br)
